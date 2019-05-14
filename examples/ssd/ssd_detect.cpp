@@ -260,7 +260,7 @@ int main(int argc, char** argv) {
     return 1;
   }
   //hy added it on 20170309
-  //char *labelname[] = { "background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor" };
+  char *labelname[] = { "background", "aeroplane", "bicycle", "bird", "boat", "bottle", "bus", "car", "cat", "chair", "cow", "diningtable", "dog", "horse", "motorbike", "person", "pottedplant", "sheep", "sofa", "train", "tvmonitor" };
   //char *labelname[] = { "background", "vehicle" };
   //hy added it on 20170309
   const string& model_file = argv[1];
@@ -292,6 +292,8 @@ int main(int argc, char** argv) {
     if (file_type == "image") {
       cv::Mat img = cv::imread(file, -1);
       CHECK(!img.empty()) << "Unable to decode image " << file;
+	  int thick = sqrt(img.rows*img.cols) / 130;
+	  int font_size = sqrt(img.rows*img.cols) / 400;
       std::vector<vector<float> > detections = detector.Detect(img);
 
       /* Print the detection results. */
@@ -314,12 +316,13 @@ int main(int argc, char** argv) {
 		  int posw = static_cast<int>(d[5] * img.cols)-posx;
 		  int posh = static_cast<int>(d[6] * img.rows) - posy;
 		  cv::Rect pos(posx, posy, posw, posh);
-		  cv::rectangle(img, pos, cv::Scalar(0, static_cast<int>(d[1]) / 21.0 * 255, 255));
-		  //std::string words = std::string(labelname[static_cast<int>(d[1])]);
+		  cv::rectangle(img, pos, cv::Scalar(0, static_cast<int>(d[1]) / 21.0 * 255, 255),thick);
+		  std::string words = std::string(labelname[static_cast<int>(d[1])]);
 		  char buffer[50];
 		  _gcvt(score, 2, buffer);
-		  std::string words = std::string(buffer);
-		  cv::putText(img, words, cv::Point(posx, posy), CV_FONT_HERSHEY_COMPLEX, 0.4, cv::Scalar(0, static_cast<int>(d[1]) / 21.0 * 255, 255));
+		  words.append(":");
+		  words.append(std::string(buffer));
+		  cv::putText(img, words, cv::Point(posx, posy), CV_FONT_HERSHEY_SIMPLEX, font_size, cv::Scalar(0, static_cast<int>(d[1]) / 21.0 * 255, 128),thick);
         }
       }
 	  cv::imshow("SSD", img);
